@@ -12,6 +12,7 @@ const (
 	atimeSort
 	ctimeSort
 	extSort
+	customSort
 )
 
 type sortOption byte
@@ -62,6 +63,7 @@ var gOpts struct {
 	cmdkeys        map[string]expr
 	cmds           map[string]expr
 	sortType       sortType
+	sorter         string
 }
 
 func init() {
@@ -96,6 +98,7 @@ func init() {
 	gOpts.info = nil
 	gOpts.shellopts = nil
 	gOpts.sortType = sortType{naturalSort, dirfirstSort}
+	gOpts.sorter = ""
 
 	gOpts.keys = make(map[string]expr)
 

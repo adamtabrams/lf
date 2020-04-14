@@ -237,6 +237,8 @@ func (e *setExpr) eval(app *app, args []string) {
 		gOpts.promptfmt = e.val
 	case "shell":
 		gOpts.shell = e.val
+	case "sorter":
+		gOpts.sorter = strings.Replace(e.val, "~", gUser.HomeDir, -1)
 	case "sortby":
 		switch e.val {
 		case "natural":
@@ -253,8 +255,10 @@ func (e *setExpr) eval(app *app, args []string) {
 			gOpts.sortType.method = atimeSort
 		case "ext":
 			gOpts.sortType.method = extSort
+		case "custom":
+			gOpts.sortType.method = customSort
 		default:
-			app.ui.echoerr("sortby: value should either be 'natural', 'name', 'size', 'time', 'atime', 'ctime' or 'ext'")
+			app.ui.echoerr("sortby: value should either be 'natural', 'name', 'size', 'time', 'atime', 'ctime', 'ext', or 'custom'")
 			return
 		}
 		app.nav.sort()
