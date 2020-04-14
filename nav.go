@@ -27,12 +27,13 @@ const (
 
 type file struct {
 	os.FileInfo
-	linkState  linkState
-	path       string
-	dirCount   int
-	accessTime time.Time
-	changeTime time.Time
-	ext        string
+	linkState   linkState
+	path        string
+	dirCount    int
+	accessTime  time.Time
+	changeTime  time.Time
+	ext         string
+	customOrder int
 }
 
 func readdir(path string) ([]*file, error) {
@@ -174,6 +175,30 @@ func (dir *dir) sort() {
 			left := leftExt + strings.ToLower(dir.files[i].Name())
 			right := rightExt + strings.ToLower(dir.files[j].Name())
 			return left < right
+		})
+	case customSort:
+		cmd := exec.Command(gOpts.sorter, dir.path)
+		out, err := cmd.Output()
+		if err != nil {
+			log.Printf("sorting files: %s", err)
+		}
+
+		// TODO change to split on NULL byte
+		orderList := strings.Split(string(out), " ")
+		customOrder := make(map[string]int, len(orderList))
+		for i, filename := range orderList {
+			customOrder[filename] = i + 1
+		}
+		for _, file := range dir.files {
+			if val, ok := customOrder[file.path]; ok {
+				file.customOrder = val
+			} else {
+				file.customOrder = len(dir.files)
+			}
+		}
+
+		sort.SliceStable(dir.files, func(i, j int) bool {
+			return dir.files[i].customOrder < dir.files[j].customOrder
 		})
 	}
 
